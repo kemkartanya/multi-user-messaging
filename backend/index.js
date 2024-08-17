@@ -1,40 +1,26 @@
 import express from "express";
 import dotenv from "dotenv";
-import { drizzle } from "drizzle-orm/node-postgres";
-import pkg from "pg";
+import db from "./db.js";
+import bodyParser from "body-parser";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { setUpSocketIO } from "./socketIO.js";
 
-const { Pool } = pkg;
+import usersRoute from "./routes/users.js";
+import messRoute from "./routes/messages.js";
 
 dotenv.config();
-
-// Database connection
-const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-});
-
-const db = drizzle(pool);
-
-if (db) {
-  console.log("Postgres Database connected!");
-}
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+app.use(bodyParser.json());
+
+app.use("/api/v1/users", usersRoute);
+app.use("/api/v1/messages", messRoute);
+
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
-
-// Run migrations
-const runMigrations = async () => {
-  await migrate(db, { migrationsFolder: "./migrations" });
-};
 
 const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

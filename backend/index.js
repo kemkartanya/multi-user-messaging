@@ -1,12 +1,11 @@
 import express from "express";
 import dotenv from "dotenv";
-import db from "./db.js";
 import bodyParser from "body-parser";
-import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { setUpSocketIO } from "./socketIO.js";
 
 import usersRoute from "./routes/users.js";
 import messRoute from "./routes/messages.js";
+import chatRoute from "./routes/chats.js";
 
 dotenv.config();
 
@@ -17,6 +16,7 @@ app.use(bodyParser.json());
 
 app.use("/api/v1/users", usersRoute);
 app.use("/api/v1/messages", messRoute);
+app.use("/api/v1/chats", chatRoute);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");

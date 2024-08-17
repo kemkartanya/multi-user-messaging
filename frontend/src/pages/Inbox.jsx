@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Chat from "../components/Chat";
+import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 
 const chats = [
   {
@@ -59,6 +61,28 @@ const chats = [
 ];
 
 const Inbox = () => {
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [searchResult, setSearchResult] = useState([]);
+  const [loadingChat, setLoadingChat] = useState(false);
+
+  const handleSearch = async () => {
+    if (!search) {
+      toast.error("Please Enter something in search");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data } = await axios.get(`/api/v1/users?search=${search}`);
+      setSearchResult(data);
+    } catch (error) {
+      toast.error("Failed to Load the Search Results");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="pt-1 flex justify-start border-t">
       <div className="w-1/3 text-left">
@@ -67,6 +91,40 @@ const Inbox = () => {
           placeholder="Search"
           className="border-2 border-gray-300 rounded-lg p-2 w-inherit m-3 w-80"
         />
+        <Toaster />
+
+        <div className="flex pb-2">
+          <input
+            type="text"
+            placeholder="Search by name or email"
+            className="mr-2 input input-bordered w-full"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <div className="btn btn-primary" onClick={handleSearch}>
+            Go
+          </div>
+        </div>
+        {loading ? (
+          <div className="flex justify-center">
+            <span className="loading loading-spinner loading-md"></span>
+          </div>
+        ) : (
+          searchResult?.map((user) => (
+            // <UserListItem
+            //   key={user._id}
+            //   user={user}
+            //   handleFunction={() => accessChat(user._id)}
+            // />
+            <div className="m-2">
+              <div>{user?.username}</div>
+            </div>
+          ))
+        )}
+        {loadingChat && (
+          <span className="loading loading-spinner loading-md"></span>
+        )}
+
         <div className="flex gap-1 border-t p-2 border-b">
           <div className="btn btn-sm">All</div>
           <div className="btn btn-sm">Unread</div>

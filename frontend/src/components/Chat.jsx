@@ -1,47 +1,45 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { GrAttachment } from "react-icons/gr";
 import { VscSend } from "react-icons/vsc";
-import { formatAMPM } from "../utils/helper.js";
+import toast, { Toaster } from "react-hot-toast";
+import axios from "axios";
 
-const messages = [
-  { content: "Hello", sender: "client", updatedAt: "2021-09-01T12:00:00" },
-  { content: "Hi", sender: "server", updatedAt: "2021-09-01T12:01:00" },
-  {
-    content: "How are you?",
-    sender: "client",
-    updatedAt: "2021-09-01T12:02:00",
-  },
-  {
-    content: "I'm good, thank you",
-    sender: "server",
-    updatedAt: "2021-09-01T12:03:00",
-  },
-  {
-    content: "How can I help you?",
-    sender: "server",
-    updatedAt: "2021-09-01T12:04:00",
-  },
-  {
-    content: "I need help with my order",
-    sender: "client",
-    updatedAt: "2021-09-01T12:05:00",
-  },
-  {
-    content: "Sure, I can help you with that",
-    sender: "server",
-    updatedAt: "2021-09-01T12:06:00",
-  },
-  { content: "Thank you", sender: "client", updatedAt: "2021-09-01T12:07:00" },
-  {
-    content: "You're welcome",
-    sender: "server",
-    updatedAt: "2021-09-01T12:08:00",
-  },
-];
+const Chat = ({ chat }) => {
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState([]);
 
-const Chat = () => {
+  const sendMessage = async () => {
+    try {
+      const { data } = await axios.post("api/v1/messages", {
+        senderId: 2,
+        content: message,
+        chatId: chat.id,
+      });
+
+      setMessage("");
+      getChatMessages();
+    } catch (error) {
+      toast.error("failed to send message");
+    }
+  };
+
+  const getChatMessages = async () => {
+    try {
+      if (!chat) return;
+      const { data } = await axios.get(`/api/v1/messages/${chat?.id}`);
+      setMessages(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    getChatMessages();
+  }, [chat]);
+
   return (
     <div className="flex justify-between flex-col">
+      <Toaster />
       <div className="flex justify-start items-start p-3 gap-3 border-b">
         <div className="avatar">
           <div className="w-12 rounded-full">
@@ -49,7 +47,9 @@ const Chat = () => {
           </div>
         </div>
         <div>
-          <div className="font-bold">Kristian</div>
+          <div className="font-bold">
+            {chat?.otherUser ? chat?.otherUser?.username : "Kristian"}
+          </div>
           <div className="text-gray-400">Typing...</div>
         </div>
       </div>
@@ -83,10 +83,12 @@ const Chat = () => {
           type="text"
           placeholder="Type your message here"
           className="w-full p-3 rounded-xl"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
         />
         <div className="flex justify-between items-center p-3 text-xl gap-3">
           <GrAttachment />
-          <VscSend />
+          <VscSend onClick={sendMessage} />
         </div>
       </div>
     </div>

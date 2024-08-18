@@ -9,7 +9,7 @@ const messages = pgTable("messages", {
   chatId: serial("chat_id")
     .references(() => chats.id, { onDelete: "cascade" })
     .notNull(),
-  readByRecipient: boolean("read_by_recipient").default(false),
+  readBy: boolean("read_by").notNull().default(false), // by user2
   createdAt: timestamp("created_at").defaultNow(),
 });
 

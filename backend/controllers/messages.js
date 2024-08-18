@@ -22,8 +22,8 @@ export const sendMess = async (req, res) => {
       .update(chats)
       .set({ latestMessageId: newMessage[0].id })
       .where(eq(chats.id, chatId))
-      .run();
-    
+      .returning({ updatedId: messages.id });
+
     res.json(newMessage[0]);
   } catch (error) {
     console.log(error);
@@ -31,6 +31,7 @@ export const sendMess = async (req, res) => {
   }
 };
 
+// messages for particular chatId
 export const allMessages = async (req, res) => {
   const chatId = parseInt(req.params.chatId);
 

@@ -1,10 +1,10 @@
-import { eq } from "drizzle-orm";
+import { eq, and, or } from "drizzle-orm";
 import db from "../db.js";
-import { chats } from "../schema.js";
+import { chats, users, messages } from "../schema.js";
 
 // Create or fetch One to One Chat
 export const accessChat = async (req, res) => {
-  const user1 = req.user.id;
+  const user1 = 2; //req.user.id;
   const user2 = req.body.user2;
 
   if (!user1 || !user2) {
@@ -15,20 +15,35 @@ export const accessChat = async (req, res) => {
   }
 
   try {
-    let isChat = await db
-      .select(chats)
-      .where(eq("user1", user1))
-      .and(eq("user2", user2))
-      .run();
+    const otherUser = await db.select().from(users).where(eq(users.id, user2));
+
+    if (otherUser.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, error: "user2 doesn't exist" });
+    }
+
+    const isChat = await db
+      .select()
+      .from(chats)
+      .where(
+        or(
+          and(eq("user1", user1), eq("user2", user2)),
+          and(eq("user1", user2), eq("user2", user1))
+        )
+      );
 
     if (isChat.length === 0) {
       const newChat = await db
         .insert(chats)
         .values({ user1: user1, user2: user2 })
         .returning();
-      return res.json(newChat[0]);
+
+      newChat[0].otherUser = otherUser[0];
+      return res.status(201).json(newChat[0]);
     } else {
-      return res.json(isChat[0]);
+      isChat[0].otherUser = otherUser[0];
+      return res.status(201).json(isChat[0]);
     }
   } catch (error) {
     console.error("Error accessing chat:", error);
@@ -40,11 +55,43 @@ export const accessChat = async (req, res) => {
 export const fetchChats = async (req, res) => {
   const filter = req.query.filter || "";
 
+  // req.user.id = 2;
+
   try {
     const results = await db
-      .select(chats)
-      .where(eq("user1", req.user.id).or(eq("user2", req.user.id)))
-      .run();
+      .select()
+      .from(chats)
+      .where(or(eq(chats.user1, 2), eq(chats.user2, 2)));
+
+    for (const result of results) {
+      if (result.user1 === 2) {
+        const otherUser = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, result.user2));
+        result.otherUser = otherUser[0];
+      } else {
+        const otherUser = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, result.user1));
+        result.otherUser = otherUser[0];
+      }
+
+      if (result.latestMessageId) {
+        const latestMessage = await db
+          .select()
+          .from(messages)
+          .where(eq(messages.id, result.latestMessageId));
+        result.latestMessage = latestMessage[0];
+
+        const sender = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, latestMessage[0].senderId));
+        result.latestMessage.sender = sender[0];
+      }
+    }
 
     if (filter === "archived") {
       return res.json(results.filter((chat) => chat.archived));

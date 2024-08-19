@@ -11,7 +11,11 @@ const Inbox = () => {
         <Chats setChat={setChat} />
       </div>
       <div className="md:w-2/3 border-l">
-        <Chat chat={chat} />
+        {chat ? (
+          <Chat chat={chat} />
+        ) : (
+          <div className="my-3">Select a chat</div>
+        )}
       </div>
     </div>
   );

@@ -7,11 +7,12 @@ import axios from "axios";
 const Chat = ({ chat }) => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const user = JSON.parse(localStorage.getItem("user"));
 
   const sendMessage = async () => {
     try {
       const { data } = await axios.post("api/v1/messages", {
-        senderId: 2,
+        senderId: user?.id,
         content: message,
         chatId: chat.id,
       });
@@ -59,12 +60,12 @@ const Chat = ({ chat }) => {
           <div
             key={index}
             className={`m-2 ${
-              message.sender === "client" ? "text-right" : "text-left"
+              message.senderId === user?.id ? "text-right" : "text-left"
             }`}
           >
             <div
               className={`inline-block px-3 py-2 rounded-lg ${
-                message.sender === "client"
+                message.senderId === user?.id
                   ? "bg-[#9296DB] text-white"
                   : "bg-gray-200 text-[#9296DB]"
               }`}

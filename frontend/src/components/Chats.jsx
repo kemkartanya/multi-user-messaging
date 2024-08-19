@@ -5,6 +5,7 @@ import axios from "axios";
 
 const Chats = ({ setChat }) => {
   const wrapperRef = useRef(null);
+  const user = JSON.parse(localStorage.getItem("user"));
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
   const [chats, setChats] = useState([]);
@@ -36,7 +37,9 @@ const Chats = ({ setChat }) => {
     // }
 
     try {
-      const { data } = await axios.get(`/api/v1/users?search=${searchTerm}`);
+      const { data } = await axios.get(
+        `/api/v1/users/${user?.id}?search=${searchTerm}`
+      );
       setSearchResult(data);
     } catch (error) {
       toast.error("Failed to Load the Search Results");
@@ -45,7 +48,7 @@ const Chats = ({ setChat }) => {
 
   const handleAccessChat = async (user2) => {
     try {
-      const { data } = await axios.post("api/v1/chats", {
+      const { data } = await axios.post(`api/v1/chats/${user?.id}`, {
         user2: user2,
       });
 
@@ -62,7 +65,7 @@ const Chats = ({ setChat }) => {
     const fetchChats = async () => {
       setLoading(true);
       try {
-        const { data } = await axios.get("api/v1/chats");
+        const { data } = await axios.get(`api/v1/chats/${user?.id}`);
         setChats(data);
       } catch (error) {
         toast.error("Failed to Load the Chats");
@@ -81,7 +84,7 @@ const Chats = ({ setChat }) => {
         <input
           type="text"
           placeholder="Search"
-          className="border-2 border-gray-300 rounded-lg p-2 md:w-[450px] w-[360px] m-3"
+          className="border-2 border-gray-300 rounded-lg p-2 md:w-[430px] w-[360px] m-3"
           value={search}
           onChange={handleSearchInput}
         />

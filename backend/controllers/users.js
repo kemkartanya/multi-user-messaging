@@ -1,11 +1,32 @@
 import db from "../db.js";
 import { users } from "../schema.js";
-import { eq, like } from "drizzle-orm";
+import { eq, like, not, and } from "drizzle-orm";
 
 export const createUser = async (req, res) => {
-  const { username } = req.body;
+  const { username, password } = req.body;
+
   try {
-    const newUser = await db.insert(users).values({ username }).returning();
+    // if username already exists
+    const existingUser = await db
+      .select()
+      .from(users)
+      .where(eq(users.username, username));
+
+    if (existingUser.length) {
+      if (existingUser[0].password === password) {
+        return res.json(existingUser[0]);
+      }
+
+      return res.status(400).json({
+        error:
+          "Username already exists! Either choose new username or enter correct password",
+      });
+    }
+
+    const newUser = await db
+      .insert(users)
+      .values({ username, password })
+      .returning();
     res.json(newUser[0]);
   } catch (error) {
     console.log(error);
@@ -14,13 +35,16 @@ export const createUser = async (req, res) => {
 };
 
 export const allUsers = async (req, res) => {
+  const userId = req.params.userId;
   const { search: keyword } = req.query;
 
   try {
     const allUsers = await db
       .select()
       .from(users)
-      .where(like(users.username, `%${keyword}%`));
+      .where(
+        and(like(users.username, `%${keyword}%`), not(eq(users.id, userId)))
+      );
 
     res.json(allUsers);
   } catch (error) {

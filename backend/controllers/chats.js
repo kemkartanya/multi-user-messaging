@@ -4,7 +4,7 @@ import { chats, users, messages } from "../schema.js";
 
 // Create or fetch One to One Chat
 export const accessChat = async (req, res) => {
-  const user1 = 2; //req.user.id;
+  const user1 = req.params.userId;
   const user2 = req.body.user2;
 
   if (!user1 || !user2) {
@@ -55,16 +55,16 @@ export const accessChat = async (req, res) => {
 export const fetchChats = async (req, res) => {
   const filter = req.query.filter || "";
 
-  // req.user.id = 2;
+  const userId = req.params.userId;
 
   try {
     const results = await db
       .select()
       .from(chats)
-      .where(or(eq(chats.user1, 2), eq(chats.user2, 2)));
+      .where(or(eq(chats.user1, userId), eq(chats.user2, userId)));
 
     for (const result of results) {
-      if (result.user1 === 2) {
+      if (result.user1 === userId) {
         const otherUser = await db
           .select()
           .from(users)

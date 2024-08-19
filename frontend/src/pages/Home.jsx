@@ -4,7 +4,7 @@ const Home = () => {
   return (
     <div className="p-8 text-[#9296DB]">
       <div className="text-2xl font-bold">Message Anyone !!</div>
-      <div>Best Messaging app in mulkiway !</div>
+      <div>Best Messaging app in milkiway !</div>
       <img
         src="/home.jpg"
         alt="home"

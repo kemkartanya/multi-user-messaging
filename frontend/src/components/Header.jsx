@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 import { LuMessageCircle } from "react-icons/lu";
+import { ChatState } from "../ChatProvider";
 
 const Header = () => {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const { user } = ChatState();
 
   const handleLogout = () => {
     localStorage.removeItem("user");
+    localStorage.clear();
   };
 
   return (

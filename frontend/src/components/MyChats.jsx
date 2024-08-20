@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import { formatDistanceToNow } from "date-fns";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
+import { ChatState } from "../ChatProvider";
 
-const Chats = ({ setChat }) => {
+const MyChats = () => {
   const wrapperRef = useRef(null);
-  const user = JSON.parse(localStorage.getItem("user"));
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
-  const [chats, setChats] = useState([]);
+  const { setSelectedChat, chats, setChats } = ChatState();
+  const user = JSON.parse(localStorage.getItem("user"));
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -52,7 +53,7 @@ const Chats = ({ setChat }) => {
         user2: user2,
       });
 
-      setChat(data);
+      setSelectedChat(data);
     } catch (error) {
       toast.error("Failed to Load the Chat");
     } finally {
@@ -110,11 +111,11 @@ const Chats = ({ setChat }) => {
       </div>
 
       <div className="overflow-y-auto h-[600px]">
-        {chats.map((chat, index) => (
+        {chats?.map((chat, index) => (
           <div
             key={index}
             className="flex justify-start items-start p-3 gap-3 border-b cursor-pointer"
-            onClick={() => setChat(chat)}
+            onClick={() => setSelectedChat(chat)}
           >
             <div className="avatar">
               <div className="w-12 rounded-full">
@@ -152,4 +153,4 @@ const Chats = ({ setChat }) => {
   );
 };
 
-export default Chats;
+export default MyChats;

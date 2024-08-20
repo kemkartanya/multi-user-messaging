@@ -17,11 +17,9 @@ const Login = () => {
 
     try {
       const { data } = await axios.post("/api/v1/users", userr);
-      console.log(data);
       localStorage.setItem("user", JSON.stringify(data));
 
       if (
-        user?.username ||
         data?.username ||
         JSON.parse(localStorage.getItem("user"))?.username
       ) {
@@ -36,7 +34,6 @@ const Login = () => {
   return (
     <div>
       <div className="text-xl my-12">Let's Chat !!</div>
-
       <Toaster />
 
       <form onSubmit={handleLogin} className="flex flex-col gap-6 items-center">

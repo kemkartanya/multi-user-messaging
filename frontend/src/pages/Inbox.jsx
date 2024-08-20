@@ -1,21 +1,18 @@
-import React, { useState } from "react";
-import Chat from "../components/Chat";
-import Chats from "../components/Chats";
+import React from "react";
+import SingleChat from "../components/SingleChat";
+import MyChats from "../components/MyChats";
+import { ChatState } from "../ChatProvider";
 
 const Inbox = () => {
-  const [chat, setChat] = useState(null);
+  const { selectedChat } = ChatState();
 
   return (
     <div className="pt-1 md:flex justify-start border-t">
       <div className="md:w-1/3 text-left">
-        <Chats setChat={setChat} />
+        <MyChats />
       </div>
       <div className="md:w-2/3 border-l">
-        {chat ? (
-          <Chat chat={chat} />
-        ) : (
-          <div className="my-3">Select a chat</div>
-        )}
+        {selectedChat ? <SingleChat /> : <div className="my-3">Select a chat</div>}
       </div>
     </div>
   );

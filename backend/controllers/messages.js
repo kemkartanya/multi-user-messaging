@@ -18,11 +18,13 @@ export const sendMess = async (req, res) => {
       .returning();
 
     // Update the latest message in the chat
-    await db
+    const updatedChat = await db
       .update(chats)
       .set({ latestMessageId: newMessage[0].id })
       .where(eq(chats.id, chatId))
-      .returning({ updatedId: messages.id });
+      .returning({ updatedId: chats.id });
+
+    console.log(updatedChat);
 
     res.json(newMessage[0]);
   } catch (error) {
